@@ -4,35 +4,56 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/pedrorcruzz/smart-spending-checker/product"
 )
 
-var dataFile = filepath.Join("data", "products.json")
+const dataDir = "data"
+const dataFile = "products.json"
+
+func ensureDataDir() error {
+	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
+		return os.Mkdir(dataDir, 0755)
+	}
+	return nil
+}
 
 func LoadProducts() (product.ProductList, error) {
 	var list product.ProductList
-	file, err := os.Open(dataFile)
-	if err != nil {
-		return product.ProductList{
-			Products:      []product.Product{},
-			MonthlyProfit: 0,
-			Month:         int(time.Now().Month()),
-			Year:          time.Now().Year(),
-		}, nil
+	list.SafePercentage = 70
+
+	if err := ensureDataDir(); err != nil {
+		return list, err
 	}
-	defer file.Close()
-	err = json.NewDecoder(file).Decode(&list)
+
+	filePath := filepath.Join(dataDir, dataFile)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return list, nil
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return list, err
+	}
+
+	if len(data) == 0 {
+		return list, nil
+	}
+
+	err = json.Unmarshal(data, &list)
 	return list, err
 }
 
 func SaveProducts(list product.ProductList) error {
-	os.MkdirAll(filepath.Dir(dataFile), 0755)
-	file, err := os.Create(dataFile)
+	if err := ensureDataDir(); err != nil {
+		return err
+	}
+
+	data, err := json.MarshalIndent(list, "", "  ")
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	return json.NewEncoder(file).Encode(list)
+
+	filePath := filepath.Join(dataDir, dataFile)
+	return os.WriteFile(filePath, data, 0644)
 }
