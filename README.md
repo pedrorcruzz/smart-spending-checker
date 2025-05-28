@@ -95,6 +95,10 @@ The program provides a recommendation based on the percentage of your monthly pr
     go run main.go
     ```
 
+1.2 Run the Program After Building
+
+      ./gestor-renda  # Replace "gestor-renda" with your app name
+       
 2.  Follow the menu instructions to add, remove, list, or edit products, update your monthly profit, and anticipate installments.
 
 ## Automating Access from Anywhere in the Terminal
