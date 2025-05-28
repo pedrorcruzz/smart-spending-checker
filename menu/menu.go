@@ -26,8 +26,7 @@ func ShowMenu() {
 
 	for {
 		utils.ClearTerminal()
-		now := time.Now()
-		title := fmt.Sprintf(" Gestor Inteligente de Gastos (%02d/%d) ", now.Month(), now.Year())
+		title := " Gestor Inteligente de Gastos "
 		divider := strings.Repeat("=", len(title)+10)
 
 		fmt.Println("\n" + divider)
