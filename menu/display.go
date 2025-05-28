@@ -53,9 +53,9 @@ func showSummary(list product.ProductList) {
 	fmt.Printf("Porcentagem segura configurada: %.0f%%\n", list.SafePercentage)
 
 	if leftPercent >= list.SafePercentage {
-		fmt.Println("✅ Você pode usar seu lucro.")
+		fmt.Println("✅ Você pode usar parte do seu lucro para pagar as parcelas!")
 	} else {
-		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos.")
+		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos!")
 		suggestProductsToSeparate(activeProducts, list.MonthlyProfit, list.SafePercentage)
 	}
 

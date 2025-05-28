@@ -117,9 +117,9 @@ func showProductsByMonth(list product.ProductList, month int, year int) {
 		fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
 
 		if leftPercent >= list.SafePercentage {
-			fmt.Println("✅ Você pode usar seu lucro.")
+			fmt.Println("✅ Você pode usar parte do seu lucro para pagar as parcelas!")
 		} else {
-			fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos.")
+			fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos!")
 			suggestProductsToSeparate(monthlyProducts, list.MonthlyProfit, list.SafePercentage)
 		}
 	}
