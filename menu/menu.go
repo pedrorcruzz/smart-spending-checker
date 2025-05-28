@@ -33,21 +33,32 @@ func ShowMenu() {
 	for {
 		utils.ClearTerminal()
 		now := time.Now()
-		fmt.Printf("\n--- Gestor Inteligente de Gastos (%02d/%d) ---\n", now.Month(), now.Year())
+		title := fmt.Sprintf(" Gestor Inteligente de Gastos (%02d/%d) ", now.Month(), now.Year())
+		divider := strings.Repeat("=", len(title)+10)
+
+		fmt.Println("\n" + divider)
+		fmt.Println(strings.Repeat(" ", 5) + title)
+		fmt.Println(divider)
+
 		if list.MonthlyProfit == 0 {
-			fmt.Println("Por favor, defina seu lucro mensal antes de adicionar produtos.")
+			fmt.Println("\nPor favor, defina seu lucro mensal antes de adicionar produtos.")
 			updateMonthlyProfit(reader, &list)
 			continue
 		}
 		showSummary(list)
 
-		fmt.Println("\n1. Adicionar produto")
+		menuDivider := strings.Repeat("-", 40)
+		fmt.Println("\n" + menuDivider)
+		fmt.Println(" MENU PRINCIPAL")
+		fmt.Println(menuDivider)
+		fmt.Println("1. Adicionar produto")
 		fmt.Println("2. Remover produto")
 		fmt.Println("3. Listar meses")
 		fmt.Println("4. Atualizar lucro mensal")
 		fmt.Println("5. Editar produto")
 		fmt.Println("6. Antecipar parcelas")
 		fmt.Println("7. Sair")
+		fmt.Println(menuDivider)
 		fmt.Print("Escolha uma opcao: ")
 		choice, _ := reader.ReadString('\n')
 		choice = strings.TrimSpace(choice)
@@ -83,6 +94,13 @@ func ShowMenu() {
 }
 
 func addProduct(reader *bufio.Reader, list *product.ProductList) {
+	title := " ADICIONAR PRODUTO "
+	divider := strings.Repeat("-", 40)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
 	fmt.Print("Nome do produto: ")
 	name, _ := reader.ReadString('\n')
 	name = strings.TrimSpace(name)
@@ -117,16 +135,26 @@ func addProduct(reader *bufio.Reader, list *product.ProductList) {
 	})
 	list.Month = int(time.Now().Month())
 	list.Year = time.Now().Year()
-	fmt.Printf("Produto adicionado! Parcela mensal: R$%.2f\n", parcel)
+
+	fmt.Println(divider)
+	fmt.Printf("✅ Produto adicionado! Parcela mensal: R$%.2f\n", parcel)
+	fmt.Println(divider)
 }
 
 func removeProduct(reader *bufio.Reader, list *product.ProductList) {
+	title := " REMOVER PRODUTO "
+	divider := strings.Repeat("-", 40)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
 	if len(list.Products) == 0 {
 		fmt.Println("Nenhum produto para remover.")
 		return
 	}
 	listProducts(reader, *list, 0, 0)
-	fmt.Print("Digite o numero do produto para remover: ")
+	fmt.Print("\nDigite o numero do produto para remover: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
 	num, err := strconv.Atoi(numStr)
@@ -135,15 +163,25 @@ func removeProduct(reader *bufio.Reader, list *product.ProductList) {
 		return
 	}
 	list.Products = append(list.Products[:num-1], list.Products[num:]...)
-	fmt.Println("Produto removido!")
+
+	fmt.Println(divider)
+	fmt.Println("✅ Produto removido!")
+	fmt.Println(divider)
 }
 
 func listMonths(reader *bufio.Reader, list product.ProductList) {
-	fmt.Println("\nListar produtos por mês:")
+	title := " LISTAR PRODUTOS POR MÊS "
+	divider := strings.Repeat("-", 40)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
 	fmt.Println("1. Mês atual")
 	for i := 1; i <= 12; i++ {
 		fmt.Printf("%d. %s\n", i+1, monthNames[i-1])
 	}
+	fmt.Println(divider)
 	fmt.Print("Escolha um mês: ")
 	monthStr, _ := reader.ReadString('\n')
 	monthStr = strings.TrimSpace(monthStr)
@@ -187,9 +225,16 @@ func listProducts(reader *bufio.Reader, list product.ProductList, month int, yea
 		return
 	}
 
+	divider := strings.Repeat("-", 60)
+
 	if month > 0 {
 		monthName := monthNames[month-1]
-		fmt.Printf("\nResumo do mes (%02d/%d - %s):\n", month, year, monthName)
+		title := fmt.Sprintf(" RESUMO DO MÊS (%02d/%d - %s) ", month, year, monthName)
+
+		fmt.Println("\n" + divider)
+		fmt.Println(title)
+		fmt.Println(divider)
+
 		fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
 
 		if list.MonthlyProfit > 0 {
@@ -206,14 +251,26 @@ func listProducts(reader *bufio.Reader, list product.ProductList, month int, yea
 		}
 	}
 
-	fmt.Println("\nProdutos cadastrados:")
+	productsTitle := " PRODUTOS CADASTRADOS "
+	fmt.Println("\n" + divider)
+	fmt.Println(productsTitle)
+	fmt.Println(divider)
+
 	for i, p := range monthlyProducts {
 		fmt.Printf("%d. %s | Total: R$%.2f | Parcela: R$%.2f (%d vezes) | Adicionado em: %s\n",
 			i+1, p.Name, p.TotalValue, p.Parcel, p.Installments, p.CreatedAt.Format("02/01/2006"))
 	}
+	fmt.Println(divider)
 }
 
 func updateMonthlyProfit(reader *bufio.Reader, list *product.ProductList) {
+	title := " ATUALIZAR LUCRO MENSAL "
+	divider := strings.Repeat("-", 40)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
 	profit, err := readFloat(reader, "Novo lucro mensal (R$): ")
 	if err != nil {
 		fmt.Println("Valor invalido.")
@@ -222,16 +279,26 @@ func updateMonthlyProfit(reader *bufio.Reader, list *product.ProductList) {
 	list.MonthlyProfit = profit
 	list.Month = int(time.Now().Month())
 	list.Year = time.Now().Year()
-	fmt.Println("Lucro mensal atualizado!")
+
+	fmt.Println(divider)
+	fmt.Println("✅ Lucro mensal atualizado!")
+	fmt.Println(divider)
 }
 
 func editProduct(reader *bufio.Reader, list *product.ProductList) {
+	title := " EDITAR PRODUTO "
+	divider := strings.Repeat("-", 40)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
 	if len(list.Products) == 0 {
 		fmt.Println("Nenhum produto para editar.")
 		return
 	}
 	listProducts(reader, *list, 0, 0)
-	fmt.Print("Digite o numero do produto para editar: ")
+	fmt.Print("\nDigite o numero do produto para editar: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
 	num, err := strconv.Atoi(numStr)
@@ -264,16 +331,26 @@ func editProduct(reader *bufio.Reader, list *product.ProductList) {
 	}
 
 	p.Parcel = p.TotalValue / float64(p.Installments)
-	fmt.Println("Produto atualizado!")
+
+	fmt.Println(divider)
+	fmt.Println("✅ Produto atualizado!")
+	fmt.Println(divider)
 }
 
 func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
+	title := " ANTECIPAR PARCELAS "
+	divider := strings.Repeat("-", 40)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
 	if len(list.Products) == 0 {
 		fmt.Println("Nenhum produto para antecipar parcelas.")
 		return
 	}
 	listProducts(reader, *list, 0, 0)
-	fmt.Print("Digite o numero do produto para antecipar parcelas: ")
+	fmt.Print("\nDigite o numero do produto para antecipar parcelas: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
 	num, err := strconv.Atoi(numStr)
@@ -293,7 +370,10 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 	}
 
 	valorTotal := float64(anticipate) * p.Parcel
+
+	fmt.Println(divider)
 	fmt.Printf("Valor total para antecipar %d parcelas: R$%.2f\n", anticipate, valorTotal)
+	fmt.Println(divider)
 }
 
 func suggestProductsToSeparate(products []product.Product, monthlyProfit float64) {
@@ -336,15 +416,21 @@ func suggestProductsToSeparate(products []product.Product, monthlyProfit float64
 		suggestedParcelSum += pwi.Product.Parcel
 	}
 
+	suggestionDivider := strings.Repeat("-", 50)
+
 	if len(suggestedProducts) == 1 {
-		fmt.Printf("Sugestão: Separe o produto '%s' (Parcela: R$%.2f) em uma caixinha separada.\n",
+		fmt.Println(suggestionDivider)
+		fmt.Printf("💡 Sugestão: Separe o produto '%s' (Parcela: R$%.2f) em uma caixinha separada.\n",
 			suggestedProducts[0].Name, suggestedProducts[0].Parcel)
+		fmt.Println(suggestionDivider)
 	} else if len(suggestedProducts) > 1 {
-		fmt.Println("Sugestão: Separe os seguintes produtos em uma caixinha:")
+		fmt.Println(suggestionDivider)
+		fmt.Println("💡 Sugestão: Separe os seguintes produtos em uma caixinha:")
 		for i, p := range suggestedProducts {
 			fmt.Printf("  %d. %s (Parcela: R$%.2f)\n", i+1, p.Name, p.Parcel)
 		}
-		fmt.Printf("Total a separar: R$%.2f\n", suggestedParcelSum)
+		fmt.Printf("  Total a separar: R$%.2f\n", suggestedParcelSum)
+		fmt.Println(suggestionDivider)
 	}
 }
 
@@ -358,7 +444,13 @@ func showSummary(list product.ProductList) {
 
 	monthName := monthNames[list.Month-1]
 
-	fmt.Printf("\nResumo do mes (%02d/%d - %s):\n", list.Month, list.Year, monthName)
+	summaryDivider := strings.Repeat("-", 60)
+	title := fmt.Sprintf(" RESUMO DO MÊS (%02d/%d - %s) ", list.Month, list.Year, monthName)
+
+	fmt.Println("\n" + summaryDivider)
+	fmt.Println(title)
+	fmt.Println(summaryDivider)
+
 	fmt.Printf("Lucro mensal: R$%.2f\n", list.MonthlyProfit)
 	fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
 	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
@@ -370,10 +462,15 @@ func showSummary(list product.ProductList) {
 	}
 
 	if len(list.Products) > 0 {
-		fmt.Println("\nProdutos ativos:")
+		productsTitle := " PRODUTOS ATIVOS "
+		fmt.Println("\n" + summaryDivider)
+		fmt.Println(productsTitle)
+		fmt.Println(summaryDivider)
+
 		for i, p := range list.Products {
 			fmt.Printf("%d. %s | Total: R$%.2f | Parcela: R$%.2f (%d vezes)\n",
 				i+1, p.Name, p.TotalValue, p.Parcel, p.Installments)
 		}
+		fmt.Println(summaryDivider)
 	}
 }
