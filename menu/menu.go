@@ -30,6 +30,11 @@ func readFloat(reader *bufio.Reader, prompt string) (float64, error) {
 func ShowMenu() {
 	reader := bufio.NewReader(os.Stdin)
 	list, _ := storage.LoadProducts()
+
+	if list.SafePercentage == 0 {
+		list.SafePercentage = 70
+	}
+
 	for {
 		utils.ClearTerminal()
 		now := time.Now()
@@ -57,7 +62,8 @@ func ShowMenu() {
 		fmt.Println("4. Atualizar lucro mensal")
 		fmt.Println("5. Editar produto")
 		fmt.Println("6. Antecipar parcelas")
-		fmt.Println("7. Sair")
+		fmt.Println("7. Configurar porcentagem segura")
+		fmt.Println("8. Sair")
 		fmt.Println(menuDivider)
 		fmt.Print("Escolha uma opcao: ")
 		choice, _ := reader.ReadString('\n')
@@ -83,6 +89,9 @@ func ShowMenu() {
 			utils.ClearTerminal()
 			anticipateInstallments(reader, &list)
 		case "7":
+			utils.ClearTerminal()
+			configureSafePercentage(reader, &list)
+		case "8":
 			storage.SaveProducts(list)
 			fmt.Println("Saindo...")
 			return
@@ -91,6 +100,31 @@ func ShowMenu() {
 		}
 		storage.SaveProducts(list)
 	}
+}
+
+func configureSafePercentage(reader *bufio.Reader, list *product.ProductList) {
+	title := " CONFIGURAR PORCENTAGEM SEGURA "
+	divider := strings.Repeat("-", 50)
+
+	fmt.Println("\n" + divider)
+	fmt.Println(title)
+	fmt.Println(divider)
+
+	fmt.Println("A porcentagem segura define quanto do seu lucro mensal deve estar disponível para reinvestimento.")
+	fmt.Println("Recomendação: Mantenha pelo menos 70% do seu lucro disponível para reinvestimento.")
+	fmt.Printf("Porcentagem atual: %.0f%%\n", list.SafePercentage)
+
+	percentage, err := readFloat(reader, "Nova porcentagem segura (ou Enter para manter): ")
+	if err != nil || percentage <= 0 || percentage > 100 {
+		fmt.Println("Valor inválido. Mantendo a porcentagem atual.")
+		return
+	}
+
+	list.SafePercentage = percentage
+
+	fmt.Println(divider)
+	fmt.Printf("✅ Porcentagem segura atualizada para %.0f%%!\n", percentage)
+	fmt.Println(divider)
 }
 
 func addProduct(reader *bufio.Reader, list *product.ProductList) {
@@ -242,11 +276,11 @@ func listProducts(reader *bufio.Reader, list product.ProductList, month int, yea
 			leftPercent := 100 - usedPercent
 			fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
 
-			if leftPercent >= 70 {
+			if leftPercent >= list.SafePercentage {
 				fmt.Println("✅ Você pode usar seu lucro.")
 			} else {
 				fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos.")
-				suggestProductsToSeparate(monthlyProducts, list.MonthlyProfit)
+				suggestProductsToSeparate(monthlyProducts, list.MonthlyProfit, list.SafePercentage)
 			}
 		}
 	}
@@ -376,7 +410,7 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Println(divider)
 }
 
-func suggestProductsToSeparate(products []product.Product, monthlyProfit float64) {
+func suggestProductsToSeparate(products []product.Product, monthlyProfit float64, safePercentage float64) {
 	if len(products) == 0 {
 		return
 	}
@@ -400,7 +434,7 @@ func suggestProductsToSeparate(products []product.Product, monthlyProfit float64
 		totalParcel += p.Parcel
 	}
 
-	targetParcel := totalParcel - (monthlyProfit * 0.7)
+	targetParcel := totalParcel - (monthlyProfit * (safePercentage / 100))
 	if targetParcel <= 0 {
 		return
 	}
@@ -454,11 +488,13 @@ func showSummary(list product.ProductList) {
 	fmt.Printf("Lucro mensal: R$%.2f\n", list.MonthlyProfit)
 	fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
 	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
-	if leftPercent >= 70 {
+	fmt.Printf("Porcentagem segura configurada: %.0f%%\n", list.SafePercentage)
+
+	if leftPercent >= list.SafePercentage {
 		fmt.Println("✅ Você pode usar seu lucro.")
 	} else {
 		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos.")
-		suggestProductsToSeparate(list.Products, list.MonthlyProfit)
+		suggestProductsToSeparate(list.Products, list.MonthlyProfit, list.SafePercentage)
 	}
 
 	if len(list.Products) > 0 {

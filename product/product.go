@@ -11,8 +11,9 @@ type Product struct {
 }
 
 type ProductList struct {
-	Products      []Product `json:"products"`
-	MonthlyProfit float64   `json:"monthly_profit"`
-	Month         int       `json:"month"`
-	Year          int       `json:"year"`
+	Products       []Product `json:"products"`
+	MonthlyProfit  float64   `json:"monthly_profit"`
+	Month          int       `json:"month"`
+	Year           int       `json:"year"`
+	SafePercentage float64   `json:"safe_percentage"`
 }
