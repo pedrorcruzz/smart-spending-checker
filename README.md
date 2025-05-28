@@ -1,7 +1,7 @@
 
 <p align="center">
   <a href="#">
-    <img src="./public/demo-image.png" width="650rem" alt="Demonstração do Smart Spending Checker">
+    <img src="./public/demo.png" width="650rem" alt="Demonstração do Smart Spending Checker">
   </a>
 </p>
 
