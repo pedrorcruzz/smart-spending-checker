@@ -14,6 +14,16 @@ Smart Spending Checker is a simple system to help you control your monthly spend
 *   **Anticipate installments:** Calculate the total amount to pay if you want to anticipate a specific number of installments for a product.
 *   **Monthly summary:** See a summary for the month, including your monthly profit, total installments, percentage used, and a strategy recommendation.
 
+## Important Note on Strategy
+
+The program provides a recommendation based on the percentage of your monthly profit used for installments. It's generally recommended to keep your spending below 70% of your monthly profit. If the percentage exceeds this threshold, the program will advise against using your profit to pay for it and suggest creating a separate fund.
+
+### Notes
+
+- The program saves data in the data/products.json file, so make sure the data folder and products.json file exist and have the correct permissions.
+- The program accepts both comma (,) and dot (.) as decimal separators when entering values.
+
+
 ## How to Use
 
 ### Prerequisites
@@ -145,14 +155,6 @@ source ~/.bashrc
 Now you can run the Smart Spending Checker from any directory by typing gestor-renda in your terminal.
 
 
-## Important Note on Strategy
-
-The program provides a recommendation based on the percentage of your monthly profit used for installments. It's generally recommended to keep your spending below 70% of your monthly profit. If the percentage exceeds this threshold, the program will advise against using your profit to pay for it and suggest creating a separate fund.
-
-### Notes
-
-- The program saves data in the data/products.json file, so make sure the data folder and products.json file exist and have the correct permissions.
-- The program accepts both comma (,) and dot (.) as decimal separators when entering values.
 
 
 ## Contributing
