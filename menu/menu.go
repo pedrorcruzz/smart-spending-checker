@@ -170,12 +170,44 @@ func listProducts(reader *bufio.Reader, list product.ProductList, month int, yea
 		fmt.Println("Nenhum produto cadastrado.")
 		return
 	}
-	fmt.Println("\nProdutos cadastrados:")
-	for i, p := range list.Products {
-		if month == 0 || (list.Month == month && list.Year == year) {
-			fmt.Printf("%d. %s | Total: R$%.2f | Parcela: R$%.2f (%d vezes) | Adicionado em: %s\n",
-				i+1, p.Name, p.TotalValue, p.Parcel, p.Installments, p.CreatedAt.Format("02/01/2006"))
+
+	var monthlyProducts []product.Product
+	var totalParcel float64
+
+	for _, p := range list.Products {
+		if month == 0 || (p.CreatedAt.Month() == time.Month(month) && p.CreatedAt.Year() == year) {
+			monthlyProducts = append(monthlyProducts, p)
+			totalParcel += p.Parcel
 		}
+	}
+
+	if len(monthlyProducts) == 0 {
+		fmt.Println("Nenhum produto cadastrado para este mês.")
+		return
+	}
+
+	if month > 0 {
+		monthName := monthNames[month-1]
+		fmt.Printf("\nResumo do mes (%02d/%d - %s):\n", month, year, monthName)
+		fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
+
+		if list.MonthlyProfit > 0 {
+			usedPercent := (totalParcel / list.MonthlyProfit) * 100
+			leftPercent := 100 - usedPercent
+			fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
+
+			if leftPercent >= 70 {
+				fmt.Println("✅ Você pode usar seu lucro.")
+			} else {
+				fmt.Println("❌ Não recomendado. Crie uma caixinha separada para esse objetivo.")
+			}
+		}
+	}
+
+	fmt.Println("\nProdutos cadastrados:")
+	for i, p := range monthlyProducts {
+		fmt.Printf("%d. %s | Total: R$%.2f | Parcela: R$%.2f (%d vezes) | Adicionado em: %s\n",
+			i+1, p.Name, p.TotalValue, p.Parcel, p.Installments, p.CreatedAt.Format("02/01/2006"))
 	}
 }
 
@@ -280,5 +312,13 @@ func showSummary(list product.ProductList) {
 		fmt.Println("✅ Você pode usar seu lucro.")
 	} else {
 		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para esse objetivo.")
+	}
+
+	if len(list.Products) > 0 {
+		fmt.Println("\nProdutos ativos:")
+		for i, p := range list.Products {
+			fmt.Printf("%d. %s | Total: R$%.2f | Parcela: R$%.2f (%d vezes)\n",
+				i+1, p.Name, p.TotalValue, p.Parcel, p.Installments)
+		}
 	}
 }
