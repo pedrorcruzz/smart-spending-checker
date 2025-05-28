@@ -32,10 +32,12 @@ func showSummary(list product.ProductList) {
 
 	usedPercent := 0.0
 	leftPercent := 100.0
+	valorReinvestir := 0.0
 
 	if list.MonthlyProfit > 0 {
 		usedPercent = (totalParcel / list.MonthlyProfit) * 100
 		leftPercent = 100 - usedPercent
+		valorReinvestir = (leftPercent / 100) * list.MonthlyProfit
 	}
 
 	monthName := monthNames[targetMonth-1]
@@ -49,7 +51,7 @@ func showSummary(list product.ProductList) {
 
 	fmt.Printf("Lucro mensal: R$%.2f\n", list.MonthlyProfit)
 	fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
-	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
+	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%% (R$%.2f)\n", usedPercent, leftPercent, valorReinvestir)
 	fmt.Printf("Porcentagem segura configurada: %.0f%%\n", list.SafePercentage)
 
 	if leftPercent >= list.SafePercentage {
