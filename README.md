@@ -1,3 +1,10 @@
+
+<p align="center">
+  <a href="#">
+    <img src="./public/demo.png" width="650rem" alt="Demonstração do Smart Spending Checker">
+  </a>
+</p>
+
 # Smart Spending Checker
 
 Smart Spending Checker is a simple system to help you control your monthly spending, allowing you to add installment purchases and track their impact on your budget.
