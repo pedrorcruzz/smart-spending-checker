@@ -53,7 +53,7 @@ func ShowMenu() {
 		fmt.Println("7. Configurar porcentagem segura")
 		fmt.Println("8. Sair")
 		fmt.Println(menuDivider)
-		fmt.Print("Escolha uma opcao: ")
+		fmt.Print("Escolha uma opcão: ")
 		choice, _ := reader.ReadString('\n')
 		choice = strings.TrimSpace(choice)
 
@@ -84,7 +84,7 @@ func ShowMenu() {
 			fmt.Println("Saindo...")
 			return
 		default:
-			fmt.Println("Opcao invalida.")
+			fmt.Println("Opcão inválida.")
 			time.Sleep(1 * time.Second)
 		}
 		storage.SaveProducts(list)
