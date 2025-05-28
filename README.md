@@ -23,17 +23,11 @@ Smart Spending Checker is a simple system to help you control your monthly spend
 1.  Clone the repository:
 
     ```bash
-    git clone [your-repository-url]
-    cd [your-repository-name]
+    git clone https://github.com/pedrorcruzz/smart-spending-checker.git
+    cd smart-spending-checker
     ```
 
-2.  Initialize the Go module:
-
-    ```bash
-    go mod init [your-module-name]
-    ```
-
-3.  Run the program:
+2.  Run the program:
 
     ```bash
     go run main.go
