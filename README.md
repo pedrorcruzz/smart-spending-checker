@@ -54,6 +54,14 @@ The program provides a recommendation based on the percentage of your monthly pr
     go run main.go
     ```
 
+3. **Or build the executable:**
+
+    ```bash
+    go build -o gestor-renda  # Replace "gestor-renda" with your preferred app name
+    ```
+
+    This will generate a binary named `gestor-renda` in the current folder.
+
 ### Setup
 
 1.  **Create the `data` folder:**
@@ -102,7 +110,7 @@ Create a file named `smart-spending-checker.sh` (or any name you prefer) in a di
 
 cd ~/Developer/Scripts/smart-spending-checker  # ⚠️ REPLACE THIS WITH YOUR ACTUAL PATH
 
-make run
+./gestor-renda  # ⚠️ REPLACE THIS WITH YOUR APP NAME
 sleep 1.3
 clear
 ```
