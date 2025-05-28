@@ -7,6 +7,8 @@
 
 # Smart Spending Checker
 
+Version: CLI
+
 Smart Spending Checker is a simple system to help you control your monthly spending, allowing you to add installment purchases and track their impact on your budget.
 
 > **Note:** The program runs in Brazilian Portuguese (`pt-BR`). All menus, prompts, and messages will be displayed in Portuguese.
