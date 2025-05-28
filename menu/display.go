@@ -53,6 +53,8 @@ func showSummary(list product.ProductList) {
 	fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
 	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%% (R$%.2f)\n", usedPercent, leftPercent, valorReinvestir)
 	fmt.Printf("Porcentagem segura configurada: %.0f%%\n", list.SafePercentage)
+	fmt.Println("")
+	fmt.Println(summaryDivider)
 
 	if leftPercent >= list.SafePercentage {
 		fmt.Println("✅ Você pode usar parte do seu lucro para pagar as parcelas!")
