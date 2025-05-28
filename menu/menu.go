@@ -10,15 +10,14 @@ import (
 
 	"github.com/pedrorcruzz/smart-spending-checker/product"
 	"github.com/pedrorcruzz/smart-spending-checker/storage"
+	"github.com/pedrorcruzz/smart-spending-checker/utils"
 )
 
-// Nomes dos meses em português
 var monthNames = []string{
 	"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
 	"Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 }
 
-// Função para ler float aceitando vírgula ou ponto
 func readFloat(reader *bufio.Reader, prompt string) (float64, error) {
 	fmt.Print(prompt)
 	valueStr, _ := reader.ReadString('\n')
@@ -31,11 +30,13 @@ func ShowMenu() {
 	reader := bufio.NewReader(os.Stdin)
 	list, _ := storage.LoadProducts()
 	for {
+		utils.ClearTerminal()
 		now := time.Now()
-		fmt.Printf("\n--- Smart Spending Checker (%02d/%d) ---\n", now.Month(), now.Year())
+		fmt.Printf("\n--- Gestor Inteligente de Gastos (%02d/%d) ---\n", now.Month(), now.Year())
 		if list.MonthlyProfit == 0 {
 			fmt.Println("Por favor, defina seu lucro mensal antes de adicionar produtos.")
 			updateMonthlyProfit(reader, &list)
+			continue
 		}
 		showSummary(list)
 
@@ -52,20 +53,26 @@ func ShowMenu() {
 
 		switch choice {
 		case "1":
+			utils.ClearTerminal()
 			addProduct(reader, &list)
 		case "2":
+			utils.ClearTerminal()
 			removeProduct(reader, &list)
 		case "3":
+			utils.ClearTerminal()
 			listMonths(reader, list)
 		case "4":
+			utils.ClearTerminal()
 			updateMonthlyProfit(reader, &list)
 		case "5":
+			utils.ClearTerminal()
 			editProduct(reader, &list)
 		case "6":
+			utils.ClearTerminal()
 			anticipateInstallments(reader, &list)
 		case "7":
 			storage.SaveProducts(list)
-			fmt.Println("Saindo. Ate logo!")
+			fmt.Println("Saindo...")
 			return
 		default:
 			fmt.Println("Opcao invalida.")
@@ -117,7 +124,7 @@ func removeProduct(reader *bufio.Reader, list *product.ProductList) {
 		fmt.Println("Nenhum produto para remover.")
 		return
 	}
-	listProducts(reader, *list, 0, 0) // Lista todos os produtos
+	listProducts(reader, *list, 0, 0)
 	fmt.Print("Digite o numero do produto para remover: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
@@ -146,13 +153,13 @@ func listMonths(reader *bufio.Reader, list product.ProductList) {
 	}
 
 	var selectedMonth, selectedYear int
-	if month == 1 { // Mês atual
+	if month == 1 {
 		now := time.Now()
 		selectedMonth = int(now.Month())
 		selectedYear = now.Year()
-	} else { // Mês específico
+	} else {
 		selectedMonth = month - 1
-		selectedYear = time.Now().Year() // Assumindo o ano atual
+		selectedYear = time.Now().Year()
 	}
 
 	listProducts(reader, list, selectedMonth, selectedYear)
@@ -189,7 +196,7 @@ func editProduct(reader *bufio.Reader, list *product.ProductList) {
 		fmt.Println("Nenhum produto para editar.")
 		return
 	}
-	listProducts(reader, *list, 0, 0) // Lista todos os produtos
+	listProducts(reader, *list, 0, 0)
 	fmt.Print("Digite o numero do produto para editar: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
@@ -222,7 +229,6 @@ func editProduct(reader *bufio.Reader, list *product.ProductList) {
 		}
 	}
 
-	// Atualiza o valor da parcela
 	p.Parcel = p.TotalValue / float64(p.Installments)
 	fmt.Println("Produto atualizado!")
 }
@@ -232,7 +238,7 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 		fmt.Println("Nenhum produto para antecipar parcelas.")
 		return
 	}
-	listProducts(reader, *list, 0, 0) // Lista todos os produtos
+	listProducts(reader, *list, 0, 0)
 	fmt.Print("Digite o numero do produto para antecipar parcelas: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
@@ -254,7 +260,6 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 
 	valorTotal := float64(anticipate) * p.Parcel
 	fmt.Printf("Valor total para antecipar %d parcelas: R$%.2f\n", anticipate, valorTotal)
-	// Aqui você pode adicionar lógica para remover as parcelas antecipadas, se desejar.
 }
 
 func showSummary(list product.ProductList) {
@@ -272,8 +277,8 @@ func showSummary(list product.ProductList) {
 	fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
 	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%%\n", usedPercent, leftPercent)
 	if leftPercent >= 70 {
-		fmt.Println("+ Estrategia aprovada. Voce pode usar seu lucro para pagar por isso.")
+		fmt.Println("✅ Você pode usar seu lucro.")
 	} else {
-		fmt.Println("- Nao recomendado. Crie uma caixinha separada para esse objetivo.")
+		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para esse objetivo.")
 	}
 }
