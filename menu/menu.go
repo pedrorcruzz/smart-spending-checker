@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -174,10 +175,10 @@ func listProducts(reader *bufio.Reader, list product.ProductList, month int, yea
 	var monthlyProducts []product.Product
 	var totalParcel float64
 
-	for _, p := range list.Products {
-		if month == 0 || (p.CreatedAt.Month() == time.Month(month) && p.CreatedAt.Year() == year) {
-			monthlyProducts = append(monthlyProducts, p)
-			totalParcel += p.Parcel
+	for i := range list.Products {
+		if month == 0 || (list.Products[i].CreatedAt.Month() == time.Month(month) && list.Products[i].CreatedAt.Year() == year) {
+			monthlyProducts = append(monthlyProducts, list.Products[i])
+			totalParcel += list.Products[i].Parcel
 		}
 	}
 
@@ -199,7 +200,8 @@ func listProducts(reader *bufio.Reader, list product.ProductList, month int, yea
 			if leftPercent >= 70 {
 				fmt.Println("✅ Você pode usar seu lucro.")
 			} else {
-				fmt.Println("❌ Não recomendado. Crie uma caixinha separada para esse objetivo.")
+				fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos.")
+				suggestProductsToSeparate(monthlyProducts, list.MonthlyProfit)
 			}
 		}
 	}
@@ -294,6 +296,58 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Printf("Valor total para antecipar %d parcelas: R$%.2f\n", anticipate, valorTotal)
 }
 
+func suggestProductsToSeparate(products []product.Product, monthlyProfit float64) {
+	if len(products) == 0 {
+		return
+	}
+
+	type ProductWithIndex struct {
+		Index   int
+		Product product.Product
+	}
+
+	productsWithIndex := make([]ProductWithIndex, len(products))
+	for i, p := range products {
+		productsWithIndex[i] = ProductWithIndex{i, p}
+	}
+
+	sort.Slice(productsWithIndex, func(i, j int) bool {
+		return productsWithIndex[i].Product.Parcel > productsWithIndex[j].Product.Parcel
+	})
+
+	var totalParcel float64
+	for _, p := range products {
+		totalParcel += p.Parcel
+	}
+
+	targetParcel := totalParcel - (monthlyProfit * 0.7)
+	if targetParcel <= 0 {
+		return
+	}
+
+	var suggestedProducts []product.Product
+	var suggestedParcelSum float64
+
+	for _, pwi := range productsWithIndex {
+		if suggestedParcelSum >= targetParcel {
+			break
+		}
+		suggestedProducts = append(suggestedProducts, pwi.Product)
+		suggestedParcelSum += pwi.Product.Parcel
+	}
+
+	if len(suggestedProducts) == 1 {
+		fmt.Printf("Sugestão: Separe o produto '%s' (Parcela: R$%.2f) em uma caixinha separada.\n",
+			suggestedProducts[0].Name, suggestedProducts[0].Parcel)
+	} else if len(suggestedProducts) > 1 {
+		fmt.Println("Sugestão: Separe os seguintes produtos em uma caixinha:")
+		for i, p := range suggestedProducts {
+			fmt.Printf("  %d. %s (Parcela: R$%.2f)\n", i+1, p.Name, p.Parcel)
+		}
+		fmt.Printf("Total a separar: R$%.2f\n", suggestedParcelSum)
+	}
+}
+
 func showSummary(list product.ProductList) {
 	var totalParcel float64
 	for _, p := range list.Products {
@@ -311,7 +365,8 @@ func showSummary(list product.ProductList) {
 	if leftPercent >= 70 {
 		fmt.Println("✅ Você pode usar seu lucro.")
 	} else {
-		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para esse objetivo.")
+		fmt.Println("❌ Não recomendado. Crie uma caixinha separada para alguns produtos.")
+		suggestProductsToSeparate(list.Products, list.MonthlyProfit)
 	}
 
 	if len(list.Products) > 0 {
