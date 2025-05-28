@@ -93,7 +93,7 @@ Create a file named `smart-spending-checker.sh` (or any name you prefer) in a di
 
 cd ~/Developer/Scripts/smart-spending-checker  # ⚠️ REPLACE THIS WITH YOUR ACTUAL PATH
 
-make run > /dev/null 2>&1 # Runs the program and hides output
+make run
 sleep 1.3
 clear
 ```
