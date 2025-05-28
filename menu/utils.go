@@ -45,13 +45,18 @@ func selectProductByYearMonth(reader *bufio.Reader, products []product.Product) 
 	}
 	sort.Ints(years)
 
-	fmt.Println("\nSelecione o ano:")
+	fmt.Println("\nSelecione o ano (0 para voltar):")
 	for i, y := range years {
 		fmt.Printf("%d. %d\n", i+1, y)
 	}
 	fmt.Print("Ano: ")
 	yearStr, _ := reader.ReadString('\n')
 	yearStr = strings.TrimSpace(yearStr)
+
+	if yearStr == "0" {
+		return -1, false
+	}
+
 	yearIdx, err := strconv.Atoi(yearStr)
 	if err != nil || yearIdx < 1 || yearIdx > len(years) {
 		fmt.Println("Ano inválido.")
@@ -66,13 +71,18 @@ func selectProductByYearMonth(reader *bufio.Reader, products []product.Product) 
 	}
 	sort.Ints(months)
 
-	fmt.Println("\nSelecione o mês:")
+	fmt.Println("\nSelecione o mês (0 para voltar):")
 	for i, m := range months {
 		fmt.Printf("%d. %s\n", i+1, monthNames[m-1])
 	}
 	fmt.Print("Mês: ")
 	monthStr, _ := reader.ReadString('\n')
 	monthStr = strings.TrimSpace(monthStr)
+
+	if monthStr == "0" {
+		return -1, false
+	}
+
 	monthIdx, err := strconv.Atoi(monthStr)
 	if err != nil || monthIdx < 1 || monthIdx > len(months) {
 		fmt.Println("Mês inválido.")
@@ -91,7 +101,7 @@ func selectProductByYearMonth(reader *bufio.Reader, products []product.Product) 
 		}
 	}
 
-	fmt.Println("\nSelecione o produto:")
+	fmt.Println("\nSelecione o produto (0 para voltar):")
 	for i, idx := range uniqueIndexes {
 		p := products[idx]
 		fmt.Printf("%d. %s | Total: R$%.2f | Parcelas: %d | Adicionado em: %s\n",
@@ -100,6 +110,11 @@ func selectProductByYearMonth(reader *bufio.Reader, products []product.Product) 
 	fmt.Print("Produto: ")
 	prodStr, _ := reader.ReadString('\n')
 	prodStr = strings.TrimSpace(prodStr)
+
+	if prodStr == "0" {
+		return -1, false
+	}
+
 	prodIdx, err := strconv.Atoi(prodStr)
 	if err != nil || prodIdx < 1 || prodIdx > len(uniqueIndexes) {
 		fmt.Println("Produto inválido.")

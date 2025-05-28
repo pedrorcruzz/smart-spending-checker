@@ -12,11 +12,13 @@ import (
 )
 
 func listMonths(reader *bufio.Reader, list product.ProductList) {
-	title := " LISTAR PRODUTOS POR MÊS "
+	title := " LISTAR MESES "
 	divider := strings.Repeat("-", 40)
 
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
+	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
 	fmt.Println(divider)
 
 	byYearMonth := mapProductsByYearMonth(list.Products)
@@ -32,13 +34,18 @@ func listMonths(reader *bufio.Reader, list product.ProductList) {
 	}
 	sort.Ints(years)
 
-	fmt.Println("Selecione o ano:")
+	fmt.Println("\nSelecione o ano (0 para voltar):")
 	for i, y := range years {
 		fmt.Printf("%d. %d\n", i+1, y)
 	}
 	fmt.Print("Ano: ")
 	yearStr, _ := reader.ReadString('\n')
 	yearStr = strings.TrimSpace(yearStr)
+
+	if yearStr == "0" {
+		return
+	}
+
 	yearIdx, err := strconv.Atoi(yearStr)
 	if err != nil || yearIdx < 1 || yearIdx > len(years) {
 		fmt.Println("Ano inválido.")
@@ -54,13 +61,18 @@ func listMonths(reader *bufio.Reader, list product.ProductList) {
 	}
 	sort.Ints(months)
 
-	fmt.Println("\nSelecione o mês:")
+	fmt.Println("\nSelecione o mês (0 para voltar):")
 	for i, m := range months {
 		fmt.Printf("%d. %s\n", i+1, monthNames[m-1])
 	}
 	fmt.Print("Mês: ")
 	monthStr, _ := reader.ReadString('\n')
 	monthStr = strings.TrimSpace(monthStr)
+
+	if monthStr == "0" {
+		return
+	}
+
 	monthIdx, err := strconv.Atoi(monthStr)
 	if err != nil || monthIdx < 1 || monthIdx > len(months) {
 		fmt.Println("Mês inválido.")
@@ -69,8 +81,36 @@ func listMonths(reader *bufio.Reader, list product.ProductList) {
 	}
 	month := months[monthIdx-1]
 
-	showProductsByMonth(list, month, year)
-	fmt.Print("\nPressione Enter para voltar ao menu principal...")
+	prodIndexes := monthsMap[month]
+	if len(prodIndexes) == 0 {
+		fmt.Printf("\nNenhum produto encontrado para %s/%d.\n", monthNames[month-1], year)
+		time.Sleep(2 * time.Second)
+		return
+	}
+
+	uniqueIndexes := make([]int, 0)
+	seen := make(map[int]bool)
+	for _, idx := range prodIndexes {
+		if !seen[idx] {
+			seen[idx] = true
+			uniqueIndexes = append(uniqueIndexes, idx)
+		}
+	}
+
+	productsTitle := fmt.Sprintf(" PRODUTOS DE %s/%d ", monthNames[month-1], year)
+	fmt.Println("\n" + divider)
+	fmt.Println(productsTitle)
+	fmt.Println(divider)
+
+	for i, idx := range uniqueIndexes {
+		p := list.Products[idx]
+		installmentNumber := getInstallmentNumber(p, year, month)
+		fmt.Printf("%d. %s | Total: R$%.2f | Parcela: R$%.2f (%d/%d)\n",
+			i+1, p.Name, p.TotalValue, p.Parcel, installmentNumber, p.Installments)
+	}
+	fmt.Println(divider)
+
+	fmt.Print("\nPressione Enter para voltar...")
 	reader.ReadString('\n')
 }
 

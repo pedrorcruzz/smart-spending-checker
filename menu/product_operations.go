@@ -3,6 +3,8 @@ package menu
 import (
 	"bufio"
 	"fmt"
+	"math"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -17,26 +19,47 @@ func addProduct(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
 	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
+	fmt.Println(divider)
 
-	fmt.Print("Nome do produto: ")
+	fmt.Print("Nome do produto (0 para voltar): ")
 	name, _ := reader.ReadString('\n')
 	name = strings.TrimSpace(name)
+
+	if name == "0" {
+		return
+	}
+
 	if _, err := strconv.Atoi(name); err == nil {
 		fmt.Println("Nome invalido.")
 		time.Sleep(2 * time.Second)
 		return
 	}
 
-	totalValue, err := readFloat(reader, "Valor total do produto (R$): ")
+	fmt.Print("Valor total do produto (R$) (0 para voltar): ")
+	valueStr, _ := reader.ReadString('\n')
+	valueStr = strings.TrimSpace(valueStr)
+	valueStr = strings.ReplaceAll(valueStr, ",", ".")
+
+	if valueStr == "0" {
+		return
+	}
+
+	totalValue, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
 		fmt.Println("Valor invalido.")
 		time.Sleep(2 * time.Second)
 		return
 	}
 
-	fmt.Print("Em quantas vezes será parcelado: ")
+	fmt.Print("Em quantas vezes será parcelado (0 para voltar): ")
 	installmentsStr, _ := reader.ReadString('\n')
 	installmentsStr = strings.TrimSpace(installmentsStr)
+
+	if installmentsStr == "0" {
+		return
+	}
+
 	installments, err := strconv.Atoi(installmentsStr)
 	if err != nil || installments < 1 {
 		fmt.Println("Número de parcelas inválido.")
@@ -70,6 +93,8 @@ func removeProduct(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
 	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
+	fmt.Println(divider)
 
 	if len(list.Products) == 0 {
 		fmt.Println("Nenhum produto para remover.")
@@ -92,7 +117,7 @@ func removeProduct(reader *bufio.Reader, list *product.ProductList) {
 		return
 	}
 
-	list.Products = append(list.Products[:idx], list.Products[idx+1:]...)
+	list.Products = slices.Delete(list.Products, idx, idx+1)
 
 	fmt.Println(divider)
 	fmt.Println("✅ Produto removido!")
@@ -107,6 +132,8 @@ func editProduct(reader *bufio.Reader, list *product.ProductList) {
 
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
+	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
 	fmt.Println(divider)
 
 	if len(list.Products) == 0 {
@@ -123,16 +150,26 @@ func editProduct(reader *bufio.Reader, list *product.ProductList) {
 
 	p := &list.Products[idx]
 
-	fmt.Printf("Nome atual: %s. Novo nome (ou Enter para manter): ", p.Name)
+	fmt.Printf("Nome atual: %s. Novo nome (ou Enter para manter, 0 para voltar): ", p.Name)
 	newName, _ := reader.ReadString('\n')
 	newName = strings.TrimSpace(newName)
+
+	if newName == "0" {
+		return
+	}
+
 	if newName != "" {
 		p.Name = newName
 	}
 
-	fmt.Printf("Valor total atual: R$%.2f. Novo valor (ou Enter para manter): ", p.TotalValue)
+	fmt.Printf("Valor total atual: R$%.2f. Novo valor (ou Enter para manter, 0 para voltar): ", p.TotalValue)
 	totalValueStr, _ := reader.ReadString('\n')
 	totalValueStr = strings.TrimSpace(totalValueStr)
+
+	if totalValueStr == "0" {
+		return
+	}
+
 	if totalValueStr != "" {
 		totalValueStr = strings.ReplaceAll(totalValueStr, ",", ".")
 		totalValue, err := strconv.ParseFloat(totalValueStr, 64)
@@ -141,9 +178,14 @@ func editProduct(reader *bufio.Reader, list *product.ProductList) {
 		}
 	}
 
-	fmt.Printf("Parcelas atuais: %d. Novo número de parcelas (ou Enter para manter): ", p.Installments)
+	fmt.Printf("Parcelas atuais: %d. Novo número de parcelas (ou Enter para manter, 0 para voltar): ", p.Installments)
 	installmentsStr, _ := reader.ReadString('\n')
 	installmentsStr = strings.TrimSpace(installmentsStr)
+
+	if installmentsStr == "0" {
+		return
+	}
+
 	if installmentsStr != "" {
 		installments, err := strconv.Atoi(installmentsStr)
 		if err == nil && installments > 0 {
@@ -167,6 +209,8 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
 	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
+	fmt.Println(divider)
 
 	if len(list.Products) == 0 {
 		fmt.Println("Nenhum produto para antecipar parcelas.")
@@ -184,7 +228,7 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 
 	now := time.Now()
 	monthsElapsed := int(now.Sub(p.CreatedAt).Hours()/24/30) + 1
-	if monthsElapsed > p.Installments {
+	if monthsElapsed = int(math.Min(float64(monthsElapsed), float64(p.Installments))); monthsElapsed > p.Installments {
 		monthsElapsed = p.Installments
 	}
 
@@ -195,9 +239,14 @@ func anticipateInstallments(reader *bufio.Reader, list *product.ProductList) {
 		return
 	}
 
-	fmt.Printf("Quantas parcelas deseja antecipar? (Total restante: %d): ", remainingInstallments)
+	fmt.Printf("Quantas parcelas deseja antecipar? (Total restante: %d, 0 para voltar): ", remainingInstallments)
 	anticipateStr, _ := reader.ReadString('\n')
 	anticipateStr = strings.TrimSpace(anticipateStr)
+
+	if anticipateStr == "0" {
+		return
+	}
+
 	anticipate, err := strconv.Atoi(anticipateStr)
 	if err != nil || anticipate < 1 || anticipate > remainingInstallments {
 		fmt.Println("Quantidade inválida.")
@@ -233,13 +282,25 @@ func updateMonthlyProfit(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
 	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
+	fmt.Println(divider)
 
-	profit, err := readFloat(reader, "Novo lucro mensal (R$): ")
+	fmt.Print("Novo lucro mensal (R$) (0 para voltar): ")
+	valueStr, _ := reader.ReadString('\n')
+	valueStr = strings.TrimSpace(valueStr)
+	valueStr = strings.ReplaceAll(valueStr, ",", ".")
+
+	if valueStr == "0" {
+		return
+	}
+
+	profit, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
 		fmt.Println("Valor invalido.")
 		time.Sleep(2 * time.Second)
 		return
 	}
+
 	list.MonthlyProfit = profit
 	list.Month = int(time.Now().Month())
 	list.Year = time.Now().Year()
@@ -258,14 +319,21 @@ func configureSafePercentage(reader *bufio.Reader, list *product.ProductList) {
 	fmt.Println("\n" + divider)
 	fmt.Println(title)
 	fmt.Println(divider)
+	fmt.Println("0. Voltar ao Menu")
+	fmt.Println(divider)
 
 	fmt.Println("A porcentagem segura define quanto do seu lucro mensal deve estar disponível para reinvestimento.")
 	fmt.Println("Recomendação: Mantenha pelo menos 70% do seu lucro disponível para reinvestimento.")
 	fmt.Printf("Porcentagem atual: %.0f%%\n", list.SafePercentage)
 
-	fmt.Print("Nova porcentagem segura (ou Enter para manter): ")
+	fmt.Print("Nova porcentagem segura (ou Enter para manter, 0 para voltar): ")
 	percentageStr, _ := reader.ReadString('\n')
 	percentageStr = strings.TrimSpace(percentageStr)
+
+	if percentageStr == "0" {
+		return
+	}
+
 	if percentageStr == "" {
 		fmt.Println("Mantendo a porcentagem atual.")
 		time.Sleep(2 * time.Second)
