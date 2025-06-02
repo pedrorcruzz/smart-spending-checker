@@ -40,6 +40,13 @@ func showSummary(list product.ProductList) {
 		valorReinvestir = (leftPercent / 100) * list.MonthlyProfit
 	}
 
+	spendablePercent := 100.0 - list.SafePercentage
+	spendableValue := (spendablePercent / 100) * list.MonthlyProfit
+	remainingSpendableValue := spendableValue - totalParcel
+	if remainingSpendableValue < 0 {
+		remainingSpendableValue = 0
+	}
+
 	monthName := monthNames[targetMonth-1]
 
 	summaryDivider := strings.Repeat("-", 60)
@@ -53,6 +60,9 @@ func showSummary(list product.ProductList) {
 	fmt.Printf("Total de parcelas: R$%.2f\n", totalParcel)
 	fmt.Printf("Usado: %.2f%% | Para reinvestir: %.2f%% (R$%.2f)\n", usedPercent, leftPercent, valorReinvestir)
 	fmt.Printf("Porcentagem segura configurada: %.0f%%\n", list.SafePercentage)
+	fmt.Printf("Disponível para gastos: %.0f%% (R$%.2f) | Restante: R$%.2f\n",
+		spendablePercent, spendableValue, remainingSpendableValue)
+
 	fmt.Println("")
 	fmt.Println(summaryDivider)
 
